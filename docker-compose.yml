@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=alert
+    ports:
+      - "15432:5432"
+    volumes:
+      - pg:/var/lib/postgresql/data
+
+
+  server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - PG_PORT=5432
+      - PG_HOST=db
+      - PG_USER=admin
+      - PG_PASSWORD=password
+volumes:
+  pg:

@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: windfinder-alert
+  datasource:
+    url: jdbc:postgresql://${PG_HOST}:${PG_PORT}/alert
+    username: ${PG_USER}
+    password: ${PG_PASSWORD}
+  store-type: jdbc
+  mail:
+    host:
+      smtp.gmail.com
+    port:
+      587
+    username:
+      xxxxxxx
+    password:
+      xxxxxxxxxxxxxxxx
+    properties:
+      mail:
+        smtp:
+          auth:
+            true
+          starttls:
+            enable:
+              true
+
+
+server:
+  port:
+    8080

@@ -1,0 +1,1 @@
+ALTER TABLE spot DROP COLUMN description;
