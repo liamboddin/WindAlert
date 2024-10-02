@@ -16,7 +16,6 @@ interface CreateSpotModalProps {
 
 export const CreateSpotModal = (props: CreateSpotModalProps) => {
     const [name, setName] = useState<string>();
-    const [description, setDescription] = useState<string>();
     const [position, setPosition] = useState<LatLngLiteral>({ lat: 54.4667, lng: 10 });
     const { open, setOpen } = props;
 
@@ -70,10 +69,6 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
                                 <TextField
                                     label={"Name/Spot"}
                                     onChange={e => setName(e.target.value)} />
-                                <TextField
-                                    multiline
-                                    label={"Beschreibung (optional)"}
-                                    onChange={e => setDescription(e.target.value)} />
                             </Stack>
                         </Box>
                         <Box className="grid grid-cols-2 gap-5" justifyContent={"space-evenly"}
@@ -97,7 +92,6 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
 
                                     const dto: CreateSpotDTO = {
                                         name: name,
-                                        description: description,
                                         latitude: position.lat,
                                         longitude: position.lng,
                                     };

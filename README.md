@@ -9,7 +9,7 @@
 ```
 PG_HOST=localhost;
 PG_PASSWORD=password;
-PG_PORT=65432;
+PG_PORT=15432;
 PG_USER=admin;
 ```
 

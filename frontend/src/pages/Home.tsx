@@ -86,10 +86,6 @@ export const Home = () => {
                         <div>
                             Längengrad: {dto.spotLongitude}
                         </div>
-                        {dto.spotDescription &&
-                            <div>
-                                Beschreibung: {dto.spotDescription}
-                            </div>}
                         {dto.windows.length != 0 ?
                             <Accordion>
                                 <AccordionSummary
