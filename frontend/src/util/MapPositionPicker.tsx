@@ -36,10 +36,10 @@ const MapPositionPicker = (
     return (
         <>
             <MapContainer ref={mapRef} center={position} zoom={10} scrollWheelZoom={true}
-                          style={{ height: "300px", width: "300px" }}
+                          style={{ height: "300px", width: "25vw" }}
+                          attributionControl={false}
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Marker position={position} draggable eventHandlers={eventHandlers}

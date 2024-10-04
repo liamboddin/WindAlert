@@ -1,6 +1,6 @@
 import { MapContainer, Marker, Polyline, TileLayer } from "react-leaflet";
 import { useRef } from "react";
-import { LatLngLiteral } from "leaflet";
+import { LatLngExpression, LatLngLiteral } from "leaflet";
 
 interface MapProps {
     position: LatLngLiteral;
@@ -11,46 +11,66 @@ interface MapProps {
 const MapAnglePicker = (
     props: MapProps,
 ) => {
-    const {position, startAngle, endAngle} = props;
+    const { position, startAngle, endAngle } = props;
     const mapRef = useRef(null);
-    const middleAngle = (startAngle: number, endAngle: number) => {
-        if (startAngle < endAngle) {
-            return (startAngle + endAngle) / 2;
+    const middleAngles = (startAngle: number, endAngle: number, depth: number): number[] => {
+        if (depth <= 0) {
+            if (startAngle < endAngle) {
+                return [(startAngle + endAngle) / 2];
+            }
+            return [(360 + startAngle + endAngle) / 2];
+        } else {
+            if (startAngle < endAngle) {
+                const result: number = (startAngle + endAngle) / 2;
+                return [...middleAngles(startAngle, result, depth - 1), result, ...middleAngles(result, endAngle, depth - 1)];
+            } else {
+                const result: number = (360 + startAngle + endAngle) / 2;
+                return [...middleAngles(startAngle, result, depth - 1), result, ...middleAngles(result, endAngle, depth - 1)];
+            }
         }
-        return (360 + startAngle + endAngle) / 2;
-    }
-    const halfAngle = startAngle && endAngle ? middleAngle(startAngle, endAngle) : 0;
-    const firstQuarter = startAngle && endAngle ? middleAngle(startAngle, halfAngle) : 0;
-    const thirdQuarter = startAngle && endAngle ? middleAngle(halfAngle, endAngle) : 0;
+
+    };
+
+    const recursionDepth = 3; // Increase to make arc less bumpy but less performant
+
+    const angles: number[] = startAngle != undefined && endAngle != undefined ? middleAngles(startAngle, endAngle, recursionDepth) : [];
+    const latLngAngles: LatLngExpression[] = angles.map(angle => {
+        return [position.lat + 1 / 200 * Math.cos(angle / 360 * 2 * Math.PI),
+            position.lng + 1 / 200 * Math.sin(angle / 360 * 2 * Math.PI)];
+    });
     return (
         <>
             <MapContainer ref={mapRef} center={position} zoom={14} scrollWheelZoom={true}
-                          style={{ height: "300px", width: "300px" }}
+                          style={{ height: "300px", width: "25vw" }}
+                          attributionControl={false}
             >
                 <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 <Marker position={position} />
                 {startAngle &&
                     <Polyline pathOptions={{ color: "blue" }} positions={[
                         [position.lat, position.lng],
-                        [position.lat + 1 / 200 * Math.cos(startAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(startAngle / 360 * 2 * Math.PI)]
+                        [position.lat + 1 / 200 * Math.cos(startAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(startAngle / 360 * 2 * Math.PI)],
                     ]} />
                 }
                 {endAngle &&
                     <Polyline pathOptions={{ color: "orange" }} positions={[
                         [position.lat, position.lng],
-                        [position.lat + 1 / 200 * Math.cos(endAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(endAngle / 360 * 2 * Math.PI)]
+                        [position.lat + 1 / 200 * Math.cos(endAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(endAngle / 360 * 2 * Math.PI)],
                     ]} />
                 }
-                {startAngle && endAngle && halfAngle && firstQuarter && thirdQuarter &&
-                    <Polyline pathOptions={{color: "green"}} positions={[
-                        [position.lat + 1 / 200 * Math.cos(startAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(startAngle / 360 * 2 * Math.PI)],
-                        [position.lat + 1 / 200 * Math.cos(firstQuarter / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(firstQuarter / 360 * 2 * Math.PI)],
-                        [position.lat + 1 / 200 * Math.cos(halfAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(halfAngle / 360 * 2 * Math.PI)],
-                        [position.lat + 1 / 200 * Math.cos(thirdQuarter / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(thirdQuarter / 360 * 2 * Math.PI)],
-                        [position.lat + 1 / 200 * Math.cos(endAngle / 360 * 2 * Math.PI), position.lng + 1 / 200 * Math.sin(endAngle / 360 * 2 * Math.PI)]
+                {startAngle && endAngle && angles &&
+                    <Polyline pathOptions={{ color: "green" }} positions={[
+                        [
+                            position.lat + 1 / 200 * Math.cos(startAngle / 360 * 2 * Math.PI),
+                            position.lng + 1 / 200 * Math.sin(startAngle / 360 * 2 * Math.PI),
+                        ],
+                        ...latLngAngles,
+                        [
+                            position.lat + 1 / 200 * Math.cos(endAngle / 360 * 2 * Math.PI),
+                            position.lng + 1 / 200 * Math.sin(endAngle / 360 * 2 * Math.PI),
+                        ],
                     ]} />
                 }
             </MapContainer>

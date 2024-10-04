@@ -27,10 +27,10 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
     const [endAngleError, setEndAngleError] = useState(false);
 
     useEffect(() => {
-        setSpeed(!isCreateWindow ? propDTO?.speed : undefined);
-        setStartAngle(!isCreateWindow ? propDTO?.startAngle : undefined);
-        setEndAngle(!isCreateWindow ? propDTO?.endAngle : undefined);
-    }, [isCreateWindow, propDTO?.endAngle, propDTO?.speed, propDTO?.startAngle]);
+        setSpeed(!isCreateWindow ? propDTO?.speed : Number.NaN);
+        setStartAngle(!isCreateWindow ? propDTO?.startAngle : Number.NaN);
+        setEndAngle(!isCreateWindow ? propDTO?.endAngle : Number.NaN);
+    }, [isCreateWindow, propDTO]);
 
     if (!isCreateWindow && propDTO == undefined) {
         return <></>;
@@ -74,7 +74,7 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     type={"number"}
                                     error={speedError}
                                     helperText={speedError ? "Die Windgeschwindigkeit muss gesetzt sein." : ""}
-                                    value={speed}
+                                    value={speed || ""}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setSpeedError(Number.isNaN(num) || num <= 0);
@@ -88,7 +88,7 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     type={"number"}
                                     error={startAngleError}
                                     helperText={startAngleError ? "Der Start-Winkel muss gesetzt sein." : ""}
-                                    value={startAngle}
+                                    value={startAngle || ""}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setStartAngleError(Number.isNaN(num));
@@ -106,7 +106,7 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     type={"number"}
                                     error={endAngleError}
                                     helperText={startAngleError ? "Der End-Winkel muss gesetzt sein." : ""}
-                                    value={endAngle}
+                                    value={endAngle || ""}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setEndAngleError(Number.isNaN(num));
@@ -141,7 +141,7 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                 className="button button-primary"
                                 onClick={() => {
                                     if (!speed || !startAngle || !endAngle || !spot.spotId) {
-                                        toast.warning("Not all values are set");
+                                        toast.warning("Es sind noch nicht alle Werte gesetzt!");
                                         if (!speed) {
                                             setSpeedError(true);
                                         }

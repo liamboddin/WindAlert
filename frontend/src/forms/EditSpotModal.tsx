@@ -47,7 +47,7 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    padding: "20px",
+                    width: "100%",
                 }}
             >
                 <Box
