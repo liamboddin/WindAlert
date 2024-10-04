@@ -11,6 +11,7 @@ import de.windalert.repository.WindWindowRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -29,10 +30,10 @@ public class CrudService {
 
 
     public List<InfoDTO> getInfoList() {
-        return spotRepository.findAll().stream()
+        return spotRepository.findAll().stream().sorted(Comparator.comparing(Spot::getId))
                 .map(spot -> new InfoDTO(spot.getId(), spot.getName(), spot.getLatitude(),
                         spot.getLongitude(),
-                        spot.getWindWindows().stream().map((ww) -> new InfoDTO.WindWindow(ww.getId(),
+                        spot.getWindWindows().stream().sorted(Comparator.comparing(WindWindow::getId)).map((ww) -> new InfoDTO.WindWindow(ww.getId(),
                                 ww.getSpeed(), ww.getStartAngle(), ww.getEndAngle())).toList())).toList();
     }
 
@@ -41,11 +42,11 @@ public class CrudService {
         if (optionalSpot.isPresent()) {
             throw new IllegalArgumentException("Spot does already exist");
         }
-        log.info("Creating new spot with name {}", createSpotDTO.name() );
-        Spot spot = new Spot(createSpotDTO.name(),  new HashSet<>(),
+        log.info("Creating new spot with name {}", createSpotDTO.name());
+        Spot spot = new Spot(createSpotDTO.name(), new HashSet<>(),
                 createSpotDTO.latitude(), createSpotDTO.longitude());
         spot = spotRepository.save(spot);
-        return new SpotDTO(spot.getId(), spot.getName(),  spot.getLatitude(), spot.getLongitude());
+        return new SpotDTO(spot.getId(), spot.getName(), spot.getLatitude(), spot.getLongitude());
     }
 
     public SpotDTO updateSpot(SpotDTO spotDTO) {
