@@ -19,6 +19,9 @@ interface EditWindowModalProps {
 export const EditWindowModal = (props: EditWindowModalProps) => {
     const { open, setOpen, spot, dto: propDTO } = props;
     const [dto, setDTO] = useState<WindWindow>(propDTO);
+    const [speedError, setSpeedError] = useState(false);
+    const [startAngleError, setStartAngleError] = useState(false);
+    const [endAngleError, setEndAngleError] = useState(false);
 
     return (
         <>
@@ -55,20 +58,55 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                 <MapAnglePicker position={{ lat: spot.spotLatitude, lng: spot.spotLongitude }}
                                                 startAngle={dto.startAngle} endAngle={dto.endAngle} />
                                 <TextField
+                                    label={"Windgeschwindigkeit in Knoten"}
+                                    type={"number"}
+                                    error={speedError}
+                                    helperText={speedError ? "Die Windgeschwindigkeit muss gesetzt sein." : ""}
+                                    value={dto?.speed}
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setSpeedError(Number.isNaN(num) || num <= 0);
+                                        if (!(Number.isNaN(num) || num <= 0)) {
+                                            setDTO({ ...dto, speed: num });
+                                        }
+                                    }
+                                    } />
+                                <TextField
                                     label={"Start Winkel in Grad"}
                                     type={"number"}
+                                    error={startAngleError}
+                                    helperText={startAngleError ? "Der Start-Winkel muss gesetzt sein." : ""}
                                     value={dto?.startAngle}
-                                    onChange={e => setDTO({ ...dto, startAngle: Number.parseInt(e.target.value) })} />
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setStartAngleError(Number.isNaN(num));
+                                        if (num < 0) {
+                                            setDTO({ ...dto, startAngle: num + 360 });
+                                        } else if (num > 359) {
+                                            setDTO({ ...dto, startAngle: num - 360 });
+                                        } else {
+                                            setDTO({ ...dto, startAngle: num });
+                                        }
+                                    }
+                                    } />
                                 <TextField
                                     label={"End Winkel in Grad"}
                                     type={"number"}
+                                    error={endAngleError}
+                                    helperText={startAngleError ? "Der End-Winkel muss gesetzt sein." : ""}
                                     value={dto?.endAngle}
-                                    onChange={e => setDTO({ ...dto, endAngle: Number.parseInt(e.target.value) })} />
-                                <TextField
-                                    label={"Windgeschwindigkeit in Knoten"}
-                                    type={"number"}
-                                    value={dto?.speed}
-                                    onChange={e => setDTO({ ...dto, speed: Number.parseInt(e.target.value) })} />
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setEndAngleError(Number.isNaN(num));
+                                        if (num < 0) {
+                                            setDTO({ ...dto, endAngle: num + 360 });
+                                        } else if (num > 359) {
+                                            setDTO({ ...dto, endAngle: num - 360 });
+                                        } else {
+                                            setDTO({ ...dto, endAngle: num });
+                                        }
+                                    }
+                                    } />
                             </Stack>
                         </Box>
                         <Box className="grid grid-cols-2 gap-5" paddingBottom={"20px"} paddingX={"20px"}>
@@ -76,7 +114,13 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                 style={{ marginRight: "20px" }}
                                 variant={"contained"}
                                 className="button button-secondary"
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setSpeedError(false);
+                                    setStartAngleError(false);
+                                    setEndAngleError(false);
+                                    setOpen(false);
+                                }
+                                }
                             >
                                 Schließen
                             </Button>
@@ -86,9 +130,20 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                 onClick={() => {
                                     if (!dto?.speed || !dto?.startAngle || !dto?.endAngle || !spot.spotId) {
                                         toast.warning("Not all values are set");
+                                        if (!dto.speed) {
+                                            setSpeedError(true);
+                                        }
+                                        if (!dto.startAngle) {
+                                            setStartAngleError(true);
+                                        }
+                                        if (!dto.endAngle) {
+                                            setEndAngleError(true);
+                                        }
                                         return;
                                     }
-
+                                    setSpeedError(false);
+                                    setStartAngleError(false);
+                                    setEndAngleError(false);
                                     const r: WindWindowDTO = {
                                         id: dto?.windWindowId || 0,
                                         speed: dto.speed || 0,

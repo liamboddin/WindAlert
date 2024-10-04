@@ -22,6 +22,7 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
         lat: props.dto.spotLatitude || 54.4667,
         lng: props.dto.spotLongitude || 10,
     });
+    const [nameError, setNameError] = useState(false);
     return (
         <>
             <Modal
@@ -69,9 +70,15 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                                     onChange={e => setPosition({ ...position, lng: Number.parseFloat(e.target.value) })}
                                 />
                                 <TextField
-                                    label={"Name/Spot"}
+                                    label={"Name*"}
                                     value={dto.spotName}
-                                    onChange={e => setDTO({ ...dto, spotName: e.target.value })} />
+                                    error={nameError}
+                                    helperText={nameError ? "Der Name darf nicht leer sein!" : ""}
+                                    onChange={e => {
+                                        setNameError(e.target.value.trim() == "");
+                                        setDTO({ ...dto, spotName: e.target.value });
+                                    }
+                                    } />
                             </Stack>
                         </Box>
                         <Box className="grid grid-cols-2 gap-5" justifyContent={"space-evenly"}
@@ -80,7 +87,11 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                                 style={{ marginRight: "20px" }}
                                 variant={"contained"}
                                 className="button button-secondary"
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setNameError(false);
+                                    setOpen(false);
+                                }
+                                }
                             >
                                 Schließen
                             </Button>
@@ -89,9 +100,13 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                                 className="button button-primary"
                                 onClick={() => {
                                     if (!dto.spotName || !position.lat || !position.lng) {
-                                        toast.error("Es sind noch nicht alle Werte gesetzt!");
+                                        toast.warning("Es sind noch nicht alle Werte gesetzt!");
+                                        if (!dto.spotName || dto.spotName.trim() == "") {
+                                            setNameError(true);
+                                        }
                                         return;
                                     }
+                                    setNameError(false);
 
                                     const r: SpotDTO = {
                                         id: dto.spotId,

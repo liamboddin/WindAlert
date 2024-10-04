@@ -20,6 +20,10 @@ export const CreateWindowModal = (props: CreateWindowModalProps) => {
     const [speed, setSpeed] = useState<number>();
     const [startAngle, setStartAngle] = useState<number>();
     const [endAngle, setEndAngle] = useState<number>();
+    const [speedError, setSpeedError] = useState(false);
+    const [startAngleError, setStartAngleError] = useState(false);
+    const [endAngleError, setEndAngleError] = useState(false);
+
     const { open, setOpen, spot } = props;
     const position: LatLngLiteral = { lat: spot.spotLatitude, lng: spot.spotLongitude };
 
@@ -58,17 +62,54 @@ export const CreateWindowModal = (props: CreateWindowModalProps) => {
                                    paddingX={"20px"} paddingBottom={"20px"}>
                                 <MapAnglePicker position={position} startAngle={startAngle} endAngle={endAngle} />
                                 <TextField
-                                    label={"Windgeschwindigkeit in Knoten"}
+                                    label={"Windgeschwindigkeit in Knoten*"}
                                     type={"number"}
-                                    onChange={e => setSpeed(Number.parseInt(e.target.value))} />
+                                    error={speedError}
+                                    helperText={speedError ? "Die Windgeschwindigkeit muss gesetzt sein." : ""}
+                                    value={speed}
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setSpeedError(Number.isNaN(num) || num <= 0);
+                                        if (!(Number.isNaN(num) || num <= 0)) {
+                                            setSpeed(num);
+                                        }
+                                    }} />
                                 <TextField
-                                    label={"Start Winkel in Grad"}
+                                    label={"Start Winkel in Grad*"}
                                     type={"number"}
-                                    onChange={e => setStartAngle(Number.parseInt(e.target.value))} />
+                                    error={startAngleError}
+                                    helperText={startAngleError ? "Der Start-Winkel muss gesetzt sein." : ""}
+                                    value={startAngle}
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setStartAngleError(Number.isNaN(num));
+                                        if (num < 0) {
+                                            setStartAngle(num + 360);
+                                        } else if (num > 359) {
+                                            setStartAngle(num - 360);
+                                        } else {
+                                            setStartAngle(num);
+                                        }
+                                    }
+                                    } />
                                 <TextField
-                                    label={"End Winkel in Grad"}
+                                    label={"End Winkel in Grad*"}
                                     type={"number"}
-                                    onChange={e => setEndAngle(Number.parseInt(e.target.value))} />
+                                    error={endAngleError}
+                                    helperText={startAngleError ? "Der End-Winkel muss gesetzt sein." : ""}
+                                    value={endAngle}
+                                    onChange={e => {
+                                        const num: number = Number.parseInt(e.target.value);
+                                        setEndAngleError(Number.isNaN(num));
+                                        if (num < 0) {
+                                            setEndAngle(num + 360);
+                                        } else if (num > 359) {
+                                            setEndAngle(num - 360);
+                                        } else {
+                                            setEndAngle(num);
+                                        }
+                                    }
+                                    } />
                             </Stack>
                         </Box>
                         <Box className="grid grid-cols-2 gap-5" paddingBottom={"20px"} paddingX={"20px"}>
@@ -76,7 +117,13 @@ export const CreateWindowModal = (props: CreateWindowModalProps) => {
                                 style={{ marginRight: "20px" }}
                                 variant={"contained"}
                                 className="button button-secondary"
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setSpeedError(false);
+                                    setStartAngleError(false);
+                                    setEndAngleError(false);
+                                    setOpen(false);
+                                }
+                                }
                             >
                                 Schließen
                             </Button>
@@ -85,9 +132,21 @@ export const CreateWindowModal = (props: CreateWindowModalProps) => {
                                 className="button button-primary"
                                 onClick={() => {
                                     if (!speed || !startAngle || !endAngle) {
-                                        toast.warning("Not all values are set");
+                                        toast.warning("Es sind noch nicht alle Werte gesetzt!");
+                                        if (!speed) {
+                                            setSpeedError(true);
+                                        }
+                                        if (!startAngle) {
+                                            setStartAngleError(true);
+                                        }
+                                        if (!endAngle) {
+                                            setEndAngleError(true);
+                                        }
                                         return;
                                     }
+                                    setSpeedError(false);
+                                    setStartAngleError(false);
+                                    setEndAngleError(false);
 
                                     const dto: WindWindowDTO = {
                                         speed: speed,

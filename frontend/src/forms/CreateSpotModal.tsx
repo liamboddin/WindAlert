@@ -18,7 +18,7 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
     const [name, setName] = useState<string>();
     const [position, setPosition] = useState<LatLngLiteral>({ lat: 54.4667, lng: 10 });
     const { open, setOpen } = props;
-
+    const [nameError, setNameError] = useState(false);
 
     return (
         <>
@@ -58,17 +58,29 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
                                     label={"Breitengrad"}
                                     type={"number"}
                                     value={position.lat}
-                                    onChange={e => setPosition({ ...position, lat: Number.parseFloat(e.target.value) })}
+                                    onChange={e => setPosition({
+                                        ...position,
+                                        lat: Number.isNaN(Number.parseFloat(e.target.value)) ? 0 : Number.parseFloat(e.target.value),
+                                    })}
                                 />
                                 <TextField
                                     label={"Längengrad"}
                                     type={"number"}
                                     value={position.lng}
-                                    onChange={e => setPosition({ ...position, lng: Number.parseFloat(e.target.value) })}
+                                    onChange={e => setPosition({
+                                        ...position,
+                                        lng: Number.parseFloat(e.target.value),
+                                    })}
                                 />
                                 <TextField
-                                    label={"Name/Spot"}
-                                    onChange={e => setName(e.target.value)} />
+                                    label={"Name*"}
+                                    error={nameError}
+                                    helperText={nameError ? "Der Name darf nicht leer sein!" : ""}
+                                    onChange={e => {
+                                        setNameError(e.target.value.trim() == "");
+                                        setName(e.target.value);
+                                    }
+                                    } />
                             </Stack>
                         </Box>
                         <Box className="grid grid-cols-2 gap-5" justifyContent={"space-evenly"}
@@ -77,7 +89,11 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
                                 style={{ marginRight: "20px" }}
                                 variant={"contained"}
                                 className="button button-secondary"
-                                onClick={() => setOpen(false)}
+                                onClick={() => {
+                                    setNameError(false);
+                                    setOpen(false);
+                                }
+                                }
                             >
                                 Schließen
                             </Button>
@@ -86,9 +102,14 @@ export const CreateSpotModal = (props: CreateSpotModalProps) => {
                                 className="button button-primary"
                                 onClick={() => {
                                     if (!name || !position?.lat || !position.lng) {
-                                        toast.error("Es sind noch nicht alle Werte gesetzt!");
+                                        toast.warning("Es sind noch nicht alle Werte gesetzt!");
+                                        if (!name || name.trim() == "") {
+                                            setNameError(true);
+                                        }
                                         return;
                                     }
+                                    setNameError(false);
+
 
                                     const dto: CreateSpotDTO = {
                                         name: name,
