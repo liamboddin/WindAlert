@@ -31,3 +31,11 @@ export const updateWindWindow = async (updateWindWindowDTO: WindWindowDTO): Prom
 export const deleteWindWindow = async (id: number): Promise<void> => {
     return await deleteRequest("/api/v1/window/" + id);
 };
+
+export const setPasswordRequest = async (uuid: string, password: string): Promise<void> => {
+    return await post("/api/v1/reset-password", { uuid: uuid, password: password });
+};
+
+export const login = async (username: string, password: string): Promise<void> => {
+    return await post("/api/v1/login", { username: username, password: password });
+};

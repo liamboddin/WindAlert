@@ -1,10 +1,6 @@
 package de.windalert.controller;
 
-import de.windalert.dto.CreateSpotDTO;
-import de.windalert.dto.InfoDTO;
-import de.windalert.dto.SpotDTO;
-import de.windalert.dto.WindWindowDTO;
-import de.windalert.repository.WindWindowRepository;
+import de.windalert.dto.*;
 import de.windalert.service.CrudService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +53,15 @@ public class WebController {
     @DeleteMapping("/window/{id}")
     public void deleteWindWindow(@PathVariable Long id) {
         crudService.deleteWindWindow(id);
+    }
+
+    @PostMapping("/reset-password")
+    public void resetPassword(@RequestBody @Valid PasswordReset passwordReset) {
+        return;
+    }
+
+    @PostMapping("/login")
+    public void login(@RequestBody @Valid Login login) {
+        return;
     }
 }

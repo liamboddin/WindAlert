@@ -35,8 +35,7 @@ npm run dev
 
 ## TODO's
 
-- User Management concept
-- Order by Id?
+- User Management backend concept
 - Prettier E-Mails
 - Logo
 - AI
