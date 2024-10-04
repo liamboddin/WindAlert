@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
-import { updateSpot } from "../api/callApi";
-import { SpotDTO } from "../dto/SpotDTO.ts";
+import { createSpot, updateSpot } from "../api/callApi";
 import { InfoDTO } from "../dto/InfoDTO.ts";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import MapPositionPicker from "../util/MapPositionPicker.tsx";
@@ -11,18 +10,34 @@ import { LatLngLiteral } from "leaflet";
 interface EditSpotModalProps {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    dto: InfoDTO;
+    dto?: InfoDTO;
+    isCreateSpot: boolean;
     refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<InfoDTO[], Error>>;
 }
 
 export const EditSpotModal = (props: EditSpotModalProps) => {
-    const { open, setOpen, dto: propDTO } = props;
-    const [dto, setDTO] = useState<InfoDTO>(propDTO);
+    const { open, setOpen, dto: propDTO, isCreateSpot } = props;
+    const [name, setName] = useState(!isCreateSpot ? propDTO?.spotName : "");
     const [position, setPosition] = useState<LatLngLiteral>({
-        lat: props.dto.spotLatitude || 54.4667,
-        lng: props.dto.spotLongitude || 10,
+        lat: !isCreateSpot && propDTO?.spotLatitude != undefined ? propDTO.spotLatitude : 54.4667,
+        lng: !isCreateSpot && propDTO?.spotLongitude != undefined ? propDTO.spotLongitude : 10,
     });
     const [nameError, setNameError] = useState(false);
+
+    useEffect(() => {
+        setPosition({
+            lat: !isCreateSpot && propDTO?.spotLatitude != undefined ? propDTO.spotLatitude : 54.4667,
+            lng: !isCreateSpot && propDTO?.spotLongitude != undefined ? propDTO.spotLongitude : 10,
+        });
+    }, [isCreateSpot, propDTO]);
+
+    useEffect(() => {
+        setName(!isCreateSpot ? propDTO?.spotName : "");
+    }, [isCreateSpot, propDTO]);
+
+    if (!isCreateSpot && propDTO == undefined) {
+        return <></>;
+    }
     return (
         <>
             <Modal
@@ -48,15 +63,14 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                     >
                         <Typography className="!font-semibold" id="modal-modal-title" variant="h5" component="h2"
                                     padding={"20px"}>
-                            Spot bearbeiten
+                            {isCreateSpot ? "Spot erstellen" : "Spot bearbeiten"}
                         </Typography>
                         <Box id="modal-modal-description" className={"overflow-auto"}>
                             <Stack spacing={2} direction={"column"} alignItems={"left"}
                                    alignSelf={"center"}
                                    paddingX={"20px"} paddingBottom={"20px"}
                             >
-                                <MapPositionPicker position={position} setPosition={setPosition}>
-                                </MapPositionPicker>
+                                <MapPositionPicker position={position} setPosition={setPosition} />
                                 <TextField
                                     label={"Breitengrad"}
                                     type={"number"}
@@ -71,12 +85,12 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                                 />
                                 <TextField
                                     label={"Name*"}
-                                    value={dto.spotName}
+                                    value={name}
                                     error={nameError}
                                     helperText={nameError ? "Der Name darf nicht leer sein!" : ""}
                                     onChange={e => {
                                         setNameError(e.target.value.trim() == "");
-                                        setDTO({ ...dto, spotName: e.target.value });
+                                        setName(e.target.value);
                                     }
                                     } />
                             </Stack>
@@ -99,25 +113,37 @@ export const EditSpotModal = (props: EditSpotModalProps) => {
                                 variant={"contained"}
                                 className="button button-primary"
                                 onClick={() => {
-                                    if (!dto.spotName || !position.lat || !position.lng) {
+                                    if (!name || !position?.lat || !position.lng) {
                                         toast.warning("Es sind noch nicht alle Werte gesetzt!");
-                                        if (!dto.spotName || dto.spotName.trim() == "") {
+                                        if (!name || name.trim() == "") {
                                             setNameError(true);
                                         }
                                         return;
                                     }
+
                                     setNameError(false);
 
-                                    const r: SpotDTO = {
-                                        id: dto.spotId,
-                                        name: dto.spotName,
-                                        latitude: position.lat,
-                                        longitude: position.lng,
-                                    };
-                                    updateSpot(r)
-                                        .then(() => props.refetch())
-                                        .then(() => setOpen(false));
-                                }}>
+
+                                    if (isCreateSpot) {
+                                        createSpot({ name: name, latitude: position.lat, longitude: position.lng })
+                                            .then(() => props.refetch())
+                                            .then(() => setOpen(false));
+                                    } else {
+                                        if (!propDTO?.spotId) {
+                                            toast.error("Etwas ist schief gelaufen!");
+                                            return;
+                                        }
+                                        updateSpot({
+                                            id: propDTO.spotId,
+                                            name: name,
+                                            latitude: position.lat,
+                                            longitude: position.lng,
+                                        })
+                                            .then(() => props.refetch())
+                                            .then(() => setOpen(false));
+                                    }
+                                }
+                                }>
                                 Bestätigen
                             </Button>
                         </Box>

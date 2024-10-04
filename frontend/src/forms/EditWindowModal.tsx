@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { updateWindWindow } from "../api/callApi";
-import { WindWindowDTO } from "../dto/WindWIndowDTO";
+import { createWindWindow, updateWindWindow } from "../api/callApi";
 import { Box, Button, Modal, Stack, TextField, Typography } from "@mui/material";
 import { InfoDTO, WindWindow } from "../dto/InfoDTO.ts";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
@@ -12,17 +11,30 @@ interface EditWindowModalProps {
     open: boolean;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     spot: InfoDTO;
-    dto: WindWindow;
+    dto?: WindWindow;
+    isCreateWindow: boolean;
     refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<InfoDTO[], Error>>;
 }
 
 export const EditWindowModal = (props: EditWindowModalProps) => {
-    const { open, setOpen, spot, dto: propDTO } = props;
-    const [dto, setDTO] = useState<WindWindow>(propDTO);
+    const { open, setOpen, spot, dto: propDTO, isCreateWindow, refetch } = props;
+    const [speed, setSpeed] = useState(!isCreateWindow ? propDTO?.speed : undefined);
+    const [startAngle, setStartAngle] = useState(!isCreateWindow ? propDTO?.startAngle : undefined);
+    const [endAngle, setEndAngle] = useState(!isCreateWindow ? propDTO?.endAngle : undefined);
+
     const [speedError, setSpeedError] = useState(false);
     const [startAngleError, setStartAngleError] = useState(false);
     const [endAngleError, setEndAngleError] = useState(false);
 
+    useEffect(() => {
+        setSpeed(!isCreateWindow ? propDTO?.speed : undefined);
+        setStartAngle(!isCreateWindow ? propDTO?.startAngle : undefined);
+        setEndAngle(!isCreateWindow ? propDTO?.endAngle : undefined);
+    }, [isCreateWindow, propDTO?.endAngle, propDTO?.speed, propDTO?.startAngle]);
+
+    if (!isCreateWindow && propDTO == undefined) {
+        return <></>;
+    }
     return (
         <>
             <Modal
@@ -49,25 +61,25 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                     >
                         <Typography className="!font-semibold" id="modal-modal-title" variant="h5" component="h2"
                                     padding={"20px"}>
-                            Windfenster bearbeiten
+                            {isCreateWindow ? "Windfenster erstellen" : "Windfenster bearbeiten"}
                         </Typography>
                         <Box id="modal-modal-description" className={"overflow-auto"}>
                             <Stack spacing={2} direction={"column"} alignItems={"left"}
                                    alignSelf={"center"}
                                    paddingX={"20px"} paddingBottom={"20px"}>
                                 <MapAnglePicker position={{ lat: spot.spotLatitude, lng: spot.spotLongitude }}
-                                                startAngle={dto.startAngle} endAngle={dto.endAngle} />
+                                                startAngle={startAngle} endAngle={endAngle} />
                                 <TextField
                                     label={"Windgeschwindigkeit in Knoten"}
                                     type={"number"}
                                     error={speedError}
                                     helperText={speedError ? "Die Windgeschwindigkeit muss gesetzt sein." : ""}
-                                    value={dto?.speed}
+                                    value={speed}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setSpeedError(Number.isNaN(num) || num <= 0);
                                         if (!(Number.isNaN(num) || num <= 0)) {
-                                            setDTO({ ...dto, speed: num });
+                                            setSpeed(num);
                                         }
                                     }
                                     } />
@@ -76,16 +88,16 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     type={"number"}
                                     error={startAngleError}
                                     helperText={startAngleError ? "Der Start-Winkel muss gesetzt sein." : ""}
-                                    value={dto?.startAngle}
+                                    value={startAngle}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setStartAngleError(Number.isNaN(num));
                                         if (num < 0) {
-                                            setDTO({ ...dto, startAngle: num + 360 });
+                                            setStartAngle(num + 360);
                                         } else if (num > 359) {
-                                            setDTO({ ...dto, startAngle: num - 360 });
+                                            setStartAngle(num - 360);
                                         } else {
-                                            setDTO({ ...dto, startAngle: num });
+                                            setStartAngle(num);
                                         }
                                     }
                                     } />
@@ -94,16 +106,16 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     type={"number"}
                                     error={endAngleError}
                                     helperText={startAngleError ? "Der End-Winkel muss gesetzt sein." : ""}
-                                    value={dto?.endAngle}
+                                    value={endAngle}
                                     onChange={e => {
                                         const num: number = Number.parseInt(e.target.value);
                                         setEndAngleError(Number.isNaN(num));
                                         if (num < 0) {
-                                            setDTO({ ...dto, endAngle: num + 360 });
+                                            setEndAngle(num + 360);
                                         } else if (num > 359) {
-                                            setDTO({ ...dto, endAngle: num - 360 });
+                                            setEndAngle(num - 360);
                                         } else {
-                                            setDTO({ ...dto, endAngle: num });
+                                            setEndAngle(num);
                                         }
                                     }
                                     } />
@@ -128,15 +140,15 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                 variant={"contained"}
                                 className="button button-primary"
                                 onClick={() => {
-                                    if (!dto?.speed || !dto?.startAngle || !dto?.endAngle || !spot.spotId) {
+                                    if (!speed || !startAngle || !endAngle || !spot.spotId) {
                                         toast.warning("Not all values are set");
-                                        if (!dto.speed) {
+                                        if (!speed) {
                                             setSpeedError(true);
                                         }
-                                        if (!dto.startAngle) {
+                                        if (!startAngle) {
                                             setStartAngleError(true);
                                         }
-                                        if (!dto.endAngle) {
+                                        if (!endAngle) {
                                             setEndAngleError(true);
                                         }
                                         return;
@@ -144,16 +156,31 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                                     setSpeedError(false);
                                     setStartAngleError(false);
                                     setEndAngleError(false);
-                                    const r: WindWindowDTO = {
-                                        id: dto?.windWindowId || 0,
-                                        speed: dto.speed || 0,
-                                        startAngle: dto.startAngle,
-                                        endAngle: dto.endAngle,
-                                        spotId: spot.spotId,
-                                    };
-                                    updateWindWindow(r)
-                                        .then(() => props.refetch())
-                                        .then(() => setOpen(false));
+
+                                    if (isCreateWindow) {
+                                        createWindWindow({
+                                            speed: speed,
+                                            startAngle: startAngle,
+                                            endAngle: endAngle,
+                                            spotId: spot.spotId,
+                                        })
+                                            .then(() => refetch())
+                                            .then(() => setOpen(false));
+                                    } else {
+                                        if (!propDTO?.windWindowId || !spot.spotId) {
+                                            toast.error("Etwas ist schief gelaufen!");
+                                            return;
+                                        }
+                                        updateWindWindow({
+                                            id: propDTO.windWindowId,
+                                            speed: speed,
+                                            startAngle: startAngle,
+                                            endAngle: endAngle,
+                                            spotId: spot.spotId,
+                                        })
+                                            .then(() => refetch())
+                                            .then(() => setOpen(false));
+                                    }
                                 }}>
                                 Bestätigen
                             </Button>

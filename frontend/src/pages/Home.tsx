@@ -14,8 +14,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { InfoDTO, WindWindow } from "../dto/InfoDTO.ts";
 import { Add, ExpandMore } from "@mui/icons-material";
-import { CreateSpotModal } from "../forms/CreateSpotModal.tsx";
-import { CreateWindowModal } from "../forms/CreateWindowModal.tsx";
 import { EditSpotModal } from "../forms/EditSpotModal.tsx";
 import { EditWindowModal } from "../forms/EditWindowModal.tsx";
 import { useQuery } from "@tanstack/react-query";
@@ -32,12 +30,12 @@ const useSpotInfoQuery = () => {
 
 export const Home = () => {
     const { data: spots, refetch, isFetching } = useSpotInfoQuery();
-    const [openCreateSpotModal, setOpenCreateSpotModal] = useState<boolean>(false);
-    const [openWindowModal, setOpenWindowModal] = useState<boolean>(false);
     const [openEditSpotModal, setOpenEditSpotModal] = useState<boolean>(false);
     const [openEditWindowModal, setOpenEditWindowModal] = useState<boolean>(false);
     const [selectedSpot, setSelectedSpot] = useState<InfoDTO>();
     const [selectedWindow, setSelectedWindow] = useState<WindWindow>();
+    const [isCreateSpot, setIsCreateSpot] = useState(true);
+    const [isCreateWindow, setIsCreateWindow] = useState(true);
 
     return isFetching ?
         <>
@@ -54,7 +52,11 @@ export const Home = () => {
                     </Button>
                     <Button
                         variant={"contained"}
-                        onClick={() => setOpenCreateSpotModal(true)}
+                        onClick={() => {
+                            setIsCreateSpot(true);
+                            setOpenEditSpotModal(true);
+                        }
+                        }
                     >
                         Spot erstellen
                     </Button>
@@ -76,6 +78,7 @@ export const Home = () => {
                                 }
                                 }><DeleteIcon /></IconButton>
                             <IconButton onClick={() => {
+                                setIsCreateSpot(false);
                                 setSelectedSpot(dto);
                                 setOpenEditSpotModal(true);
                             }}><EditIcon /></IconButton>
@@ -101,6 +104,7 @@ export const Home = () => {
                                                     }
                                                     }><DeleteIcon /></IconButton>
                                                 <IconButton onClick={async () => {
+                                                    setIsCreateWindow(false);
                                                     setSelectedSpot(dto);
                                                     setSelectedWindow(window);
                                                     setOpenEditWindowModal(true);
@@ -114,8 +118,9 @@ export const Home = () => {
                                                 variant="outlined"
                                                 startIcon={<Add />}
                                                 onClick={() => {
+                                                    setIsCreateWindow(true);
                                                     setSelectedSpot(dto);
-                                                    setOpenWindowModal(true);
+                                                    setOpenEditWindowModal(true);
                                                 }}
                                             >Windfenster hinzufügen</Button>
                                         </>)}
@@ -126,39 +131,35 @@ export const Home = () => {
                                 variant="outlined"
                                 startIcon={<Add />}
                                 onClick={() => {
+                                    setIsCreateWindow(true);
                                     setSelectedSpot(dto);
-                                    setOpenWindowModal(true);
+                                    setOpenEditWindowModal(true);
                                 }}
                             >Windfenster hinzufügen</Button>}
                     </>;
                 }))}
                 <Button
                     variant={"contained"}
-                    onClick={() => setOpenCreateSpotModal(true)}
+                    onClick={() => {
+                        setIsCreateSpot(true);
+                        setOpenEditSpotModal(true);
+                    }
+                    }
                 >
                     Spot erstellen
                 </Button>
             </Stack>
-                <CreateSpotModal open={openCreateSpotModal} setOpen={setOpenCreateSpotModal} refetch={refetch} />
+                <EditSpotModal open={openEditSpotModal} setOpen={setOpenEditSpotModal} dto={selectedSpot}
+                               isCreateSpot={isCreateSpot} refetch={refetch} />
                 {
                     selectedSpot &&
                     (<>
-                        <CreateWindowModal open={openWindowModal} setOpen={setOpenWindowModal}
-                                           spot={selectedSpot} refetch={refetch} />
-                        <EditSpotModal open={openEditSpotModal} setOpen={setOpenEditSpotModal}
-                                       dto={selectedSpot} refetch={refetch} />
-                    </>)
-                }
-                {selectedSpot && selectedWindow &&
-                    (<>
                         <EditWindowModal open={openEditWindowModal} setOpen={setOpenEditWindowModal}
-                                         spot={selectedSpot}
-                                         dto={selectedWindow}
-                                         refetch={refetch}
-                        />
+                                         spot={selectedSpot} dto={selectedWindow} refetch={refetch}
+                                         isCreateWindow={isCreateWindow} />
                     </>)
-
                 }
+
             </>);
 };
 
