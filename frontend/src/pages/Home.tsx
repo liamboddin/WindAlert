@@ -63,92 +63,95 @@ export const Home = () => {
                 </Stack>
             </>
         ) : (
-            <><Stack spacing={2} direction={"column"} width={"100%"} alignItems={"center"} alignSelf={"center"}
-                     paddingTop={"20px"}>
-                <Button onClick={() => refetch()}>
-                    Neu laden
-                </Button>
-                {spots.map((dto => {
-                    return <>
-                        <div>
-                            Spotname: {dto.spotName}
-                            <IconButton
-                                onClick={() => {
-                                    deleteSpot(dto.spotId).then(() => refetch());
-                                }
-                                }><DeleteIcon /></IconButton>
-                            <IconButton onClick={() => {
-                                setIsCreateSpot(false);
-                                setSelectedSpot(dto);
-                                setOpenEditSpotModal(true);
-                            }}><EditIcon /></IconButton>
-                        </div>
-                        <div>
-                            Breitengrad: {dto.spotLatitude}
-                        </div>
-                        <div>
-                            Längengrad: {dto.spotLongitude}
-                        </div>
-                        {dto.windows.length != 0 ?
-                            <Accordion>
-                                <AccordionSummary
-                                    expandIcon={<ExpandMore />}
-                                >Windfenster</AccordionSummary>
-                                <AccordionDetails>
-                                    <Stack>
-                                        {dto.windows.map((window) => <>
-                                            <div>Id: {window.windWindowId}
-                                                <IconButton
-                                                    onClick={() => {
-                                                        deleteWindWindow(window.windWindowId).then(() => refetch());
-                                                    }
-                                                    }><DeleteIcon /></IconButton>
-                                                <IconButton onClick={async () => {
-                                                    setIsCreateWindow(false);
-                                                    setSelectedSpot(dto);
-                                                    setSelectedWindow(window);
-                                                    setOpenEditWindowModal(true);
-                                                }}><EditIcon /></IconButton></div>
-                                            <div>Windgeschwindigkeit: {window.speed}kn
+            <>
+                <Stack spacing={2} direction={"column"} width={"100%"} alignItems={"center"} alignSelf={"center"}
+                       paddingTop={"20px"}>
 
-                                            </div>
-                                            <div>Startwinkel: {window.startAngle}</div>
-                                            <div>Endwinkel: {window.endAngle}</div>
-                                            <Button
-                                                variant="outlined"
-                                                startIcon={<Add />}
-                                                onClick={() => {
-                                                    setIsCreateWindow(true);
-                                                    setSelectedSpot(dto);
-                                                    setOpenEditWindowModal(true);
-                                                }}
-                                            >Windfenster hinzufügen</Button>
-                                        </>)}
-                                    </Stack>
-                                </AccordionDetails>
-                            </Accordion> :
-                            <Button
-                                variant="outlined"
-                                startIcon={<Add />}
-                                onClick={() => {
-                                    setIsCreateWindow(true);
+                    <Button onClick={() => refetch()}>
+                        Neu laden
+                    </Button>
+                    {spots.map((dto => {
+                        return <>
+                            <div>
+                                Spotname: {dto.spotName}
+                                <IconButton
+                                    onClick={() => {
+                                        deleteSpot(dto.spotId).then(() => refetch());
+                                    }
+                                    }><DeleteIcon /></IconButton>
+                                <IconButton onClick={() => {
+                                    setIsCreateSpot(false);
                                     setSelectedSpot(dto);
-                                    setOpenEditWindowModal(true);
-                                }}
-                            >Windfenster hinzufügen</Button>}
-                    </>;
-                }))}
-                <Button
-                    variant={"contained"}
-                    onClick={() => {
-                        setIsCreateSpot(true);
-                        setOpenEditSpotModal(true);
-                    }
-                    }
-                >
-                    Spot erstellen
-                </Button>
-            </Stack>
+                                    setOpenEditSpotModal(true);
+                                }}><EditIcon /></IconButton>
+                            </div>
+                            <div>
+                                Breitengrad: {dto.spotLatitude}
+                            </div>
+                            <div>
+                                Längengrad: {dto.spotLongitude}
+                            </div>
+                            {dto.windows.length != 0 ?
+                                <Accordion>
+                                    <AccordionSummary
+                                        expandIcon={<ExpandMore />}
+                                    >Windfenster</AccordionSummary>
+                                    <AccordionDetails>
+                                        <Stack>
+                                            {dto.windows.map((window) => <>
+                                                <div>Id: {window.windWindowId}
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            deleteWindWindow(window.windWindowId).then(() => refetch());
+                                                        }
+                                                        }><DeleteIcon /></IconButton>
+                                                    <IconButton onClick={async () => {
+                                                        setIsCreateWindow(false);
+                                                        setSelectedSpot(dto);
+                                                        setSelectedWindow(window);
+                                                        setOpenEditWindowModal(true);
+                                                    }}><EditIcon /></IconButton></div>
+                                                <div>Windgeschwindigkeit: {window.speed}kn
+
+                                                </div>
+                                                <div>Startwinkel: {window.startAngle}</div>
+                                                <div>Endwinkel: {window.endAngle}</div>
+                                                <Button
+                                                    variant="outlined"
+                                                    startIcon={<Add />}
+                                                    onClick={() => {
+                                                        setIsCreateWindow(true);
+                                                        setSelectedSpot(dto);
+                                                        setOpenEditWindowModal(true);
+                                                    }}
+                                                >Windfenster hinzufügen</Button>
+                                            </>)}
+                                        </Stack>
+                                    </AccordionDetails>
+                                </Accordion> :
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<Add />}
+                                    onClick={() => {
+                                        setIsCreateWindow(true);
+                                        setSelectedSpot(dto);
+                                        setOpenEditWindowModal(true);
+                                    }}
+                                >Windfenster hinzufügen</Button>}
+                        </>;
+                    }))}
+                    <Button
+                        variant={"contained"}
+                        onClick={() => {
+                            setIsCreateSpot(true);
+                            setOpenEditSpotModal(true);
+                        }
+                        }
+                    >
+                        Spot erstellen
+                    </Button>
+                </Stack>
+
                 <EditSpotModal open={openEditSpotModal} setOpen={setOpenEditSpotModal} dto={selectedSpot}
                                isCreateSpot={isCreateSpot} refetch={refetch} />
                 {

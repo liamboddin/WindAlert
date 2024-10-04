@@ -35,9 +35,7 @@ npm run dev
 
 ## TODO's
 
-- WindWindow edit modal doesn't load dto properly
 - User Management concept
-- Input validation
 - Prettier E-Mails
 - Logo
 - AI
