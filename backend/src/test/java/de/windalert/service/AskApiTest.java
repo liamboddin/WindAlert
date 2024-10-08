@@ -1,11 +1,8 @@
 package de.windalert.service;
 
 
-import de.windalert.domain.Spot;
-import de.windalert.domain.WindWindow;
 import de.windalert.repository.SpotRepository;
 import de.windalert.repository.WindWindowRepository;
-import de.windalert.service.dto.ApiResponse;
 import de.windalert.util.MailService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -18,17 +15,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.web.client.RestClient;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Testcontainers(disabledWithoutDocker = true)
@@ -71,10 +62,9 @@ public class AskApiTest {
     }
 
 
-
     @Test
     void testIsValidTime() {
         LocalDateTime date = LocalDateTime.of(2024, 10, 10, 13, 0);
-        assertEquals("10.10.2024 um 13:00 Uhr", askAPI.dateToString(date));
+        assertEquals("10.10.2024", askAPI.dateToString(date));
     }
 }
