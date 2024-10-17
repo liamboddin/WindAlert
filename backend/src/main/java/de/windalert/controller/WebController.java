@@ -1,6 +1,7 @@
 package de.windalert.controller;
 
 import de.windalert.dto.*;
+import de.windalert.service.AskAPI;
 import de.windalert.service.CrudService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,12 @@ import java.util.List;
 public class WebController {
 
     private final CrudService crudService;
+    private final AskAPI askAPI;
 
     @Autowired
-    public WebController(CrudService crudService) {
+    public WebController(CrudService crudService, AskAPI askAPI) {
         this.crudService = crudService;
+        this.askAPI = askAPI;
     }
 
     @GetMapping("/spot")
@@ -53,6 +56,11 @@ public class WebController {
     @DeleteMapping("/window/{id}")
     public void deleteWindWindow(@PathVariable Long id) {
         crudService.deleteWindWindow(id);
+    }
+
+    @PostMapping("/check-wind")
+    public void sendMail() {
+        askAPI.requestAPIAndSendMail();
     }
 
     @PostMapping("/reset-password")

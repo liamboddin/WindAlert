@@ -5,6 +5,7 @@ import de.windalert.domain.WindWindow;
 import de.windalert.repository.SpotRepository;
 import de.windalert.service.dto.ApiResponse;
 import de.windalert.util.MailService;
+import de.windalert.util.SpotStringified;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -29,89 +30,95 @@ public class AskAPI {
         this.restService = restService;
     }
 
-
     @Scheduled(cron = "0 0 7 * * *", zone = "Europe/Berlin")
     public void requestAPIAndSendMail() {
         List<Spot> spots = spotRepository.findAll();
         log.info("Starting to look for some wind!");
-        StringBuilder emailText = new StringBuilder("Guten Morgen!\n");
         boolean isWindFound = false;
+        List<SpotStringified> spotStringifiedList = new ArrayList<>();
         for (Spot spot : spots) {
             ApiResponse r = restService.requestApi("?latitude=" + spot.getLatitude() + "&longitude=" +
                     spot.getLongitude() + defaultUriVars);
-            boolean isPreTextWritten = false;
-            for (WindWindow windWindow : spot.getWindWindows()) {
-                if (!isResponseValid(r)) {
-                    log.error("Response was not valid!");
-                    break;
-                }
-                ApiResponse.Hourly hourly = r.hourly();
-                Float minSpeed = null;
-                List<LocalDateTime> startingHour = new ArrayList<>();
-                List<LocalDateTime> endingHour = new ArrayList<>();
-                boolean isStringWritten = false;
-                boolean isHourRangeStarted = false;
-                for (int i = 0; i < hourly.time().size(); i++) {
-                    LocalDateTime date = LocalDateTime.parse(hourly.time().get(i));
-                    if (isMorning(date) || (isEvening(date) && isStringWritten)) {
-                        // Skip the nights
-                        if (isMorning(date)) {
-                            // Reset everything for the next day
-                            startingHour = new ArrayList<>();
-                            endingHour = new ArrayList<>();
-                            isStringWritten = false;
-                            isHourRangeStarted = false;
-                            minSpeed = null;
-                        }
-                        continue;
-                    }
-                    if (isEvening(date) && !isStringWritten) {
-                        if (!startingHour.isEmpty()) {
-                            if (endingHour.size() < startingHour.size()) {
-                                endingHour.add(date.minusHours(1));
-                            }
-                            // If the logic is correct, those should be of the same size
-                            assert startingHour.size() == endingHour.size();
-                            if (!isPreTextWritten) {
-                                isPreTextWritten = true;
-                                emailText.append("\nEs gibt am Spot ").append(spot.getName()).append(" zu folgenden Zeiten Wind:");
-                            }
-                            emailText.append("\n- ").append(dateToString(startingHour.getFirst()));
-                            boolean isFirstRange = true;
-                            for (int j = 0; j < startingHour.size(); j++) {
-                                if (!isFirstRange) {
-                                    emailText.append(" und");
-                                }
-                                emailText.append(hourRangeToString(startingHour.get(j), endingHour.get(j)));
-                                isFirstRange = false;
-                            }
-                            emailText.append(" Wind mit mindestens ").append(minSpeed).append(" Knoten");
-                        }
-                        isStringWritten = true;
-                        continue;
-                    }
-                    if (isGoodWind(windWindow, hourly.wind_speed_10m().get(i), hourly.wind_direction_10m().get(i))) {
-                        isWindFound = true;
-                        if (!isHourRangeStarted) {
-                            startingHour.add(date);
-                            isHourRangeStarted = true;
-                        }
-                        minSpeed = minSpeed != null ?
-                                Float.min(minSpeed, hourly.wind_speed_10m().get(i)) :
-                                hourly.wind_speed_10m().get(i);
-                    }
-                    if (!isGoodWind(windWindow, hourly.wind_speed_10m().get(i), hourly.wind_direction_10m().get(i))
-                            && isHourRangeStarted) {
-                        endingHour.add(date.minusHours(1));
+            Float minSpeed = null;
+            List<LocalDateTime> startingHour = new ArrayList<>();
+            List<LocalDateTime> endingHour = new ArrayList<>();
+            boolean isStringWritten = false;
+            boolean isHourRangeStarted = false;
+            List<String> windDates = new ArrayList<>();
+            if (!isResponseValid(r)) {
+                log.error("Response was not valid!");
+                continue;
+            }
+            ApiResponse.Hourly hourly = r.hourly();
+            for (int i = 0; i < hourly.time().size(); i++) {
+
+                LocalDateTime date = LocalDateTime.parse(hourly.time().get(i));
+                if (isMorning(date) || (isEvening(date) && isStringWritten)) {
+                    // Skip the nights
+                    if (isMorning(date)) {
+                        // Reset everything for the next day
+                        startingHour = new ArrayList<>();
+                        endingHour = new ArrayList<>();
+                        isStringWritten = false;
                         isHourRangeStarted = false;
+                        minSpeed = null;
                     }
+                    continue;
                 }
+                if (isEvening(date) && !isStringWritten) {
+                    if (!startingHour.isEmpty()) {
+                        if (endingHour.size() < startingHour.size()) {
+                            endingHour.add(date.minusHours(1));
+                        }
+                        StringBuilder windDateText = new StringBuilder();
+                        // If the logic is correct, those should be of the same size
+                        assert startingHour.size() == endingHour.size();
+                        windDateText.append(dateToString(startingHour.getFirst()));
+                        boolean isFirstRange = true;
+                        for (int j = 0; j < startingHour.size(); j++) {
+                            if (!isFirstRange) {
+                                windDateText.append(" und");
+                            }
+                            windDateText.append(hourRangeToString(startingHour.get(j), endingHour.get(j)));
+                            isFirstRange = false;
+                        }
+                        windDateText.append(" Wind mit mindestens ").append(minSpeed).append(" Knoten");
+                        windDates.add(windDateText.toString());
+                    }
+                    isStringWritten = true;
+                    continue;
+                }
+
+                int finalI = i;
+                if (!spot.getWindWindows().stream()
+                        .filter(w -> isGoodWind(w, hourly.wind_speed_10m().get(finalI), hourly.wind_direction_10m().get(finalI)))
+                        .toList().isEmpty()) {
+                    // Good wind in some wind window
+                    isWindFound = true;
+                    if (!isHourRangeStarted) {
+                        startingHour.add(date);
+                        isHourRangeStarted = true;
+                    }
+                    minSpeed = minSpeed != null ?
+                            Float.min(minSpeed, hourly.wind_speed_10m().get(i)) :
+                            hourly.wind_speed_10m().get(i);
+                }
+                if (spot.getWindWindows().stream()
+                        .filter(w -> isGoodWind(w, hourly.wind_speed_10m().get(finalI), hourly.wind_direction_10m().get(finalI)))
+                        .toList().isEmpty()
+                        && isHourRangeStarted) {
+                    // No wind in any wind window
+                    endingHour.add(date.minusHours(1));
+                    isHourRangeStarted = false;
+                }
+            }
+            if (!windDates.isEmpty()) {
+                spotStringifiedList.add(new SpotStringified(spot.getName(), windDates));
             }
         }
         if (isWindFound) {
-            emailText.append("\n\nViel Spaß beim Kiten!");
             log.info("Sending mail!");
-            mailService.sendMail("liam.d.boddin@gmail.com", "WindAlert", emailText.toString());
+            mailService.sendMail("liam.d.boddin@gmail.com", "WindAlert", spotStringifiedList);
         }
         log.info("Finished looking for wind!");
     }

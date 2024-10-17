@@ -39,3 +39,7 @@ export const setPasswordRequest = async (uuid: string, password: string): Promis
 export const login = async (username: string, password: string): Promise<void> => {
     return await post("/api/v1/login", { username: username, password: password });
 };
+
+export const sendMail = async (): Promise<void> => {
+    return await post("/api/v1/check-wind", {});
+};

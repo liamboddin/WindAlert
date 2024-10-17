@@ -10,7 +10,7 @@ import {
     IconButton,
     Stack,
 } from "@mui/material";
-import { deleteSpot, deleteWindWindow, getSpotInfo } from "../api/callApi";
+import { deleteSpot, deleteWindWindow, getSpotInfo, sendMail } from "../api/callApi";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { InfoDTO, WindWindow } from "../dto/InfoDTO.ts";
@@ -76,12 +76,12 @@ export const Home = () => {
                            sx={{
                                display: "flex",
                                justifyContent: "center",
-                               width: "20%",
+                               width: "30%",
                            }}>
                         <Box sx={{ display: "flex", justifyContent: "center", width: "auto" }}>
                             <Button
-                                onClick={() => refetch()}>
-                                Neu laden
+                                onClick={() => sendMail()}>
+                                Manuell Wind checken
                             </Button>
                         </Box>
                         {spots.map(dto => {
