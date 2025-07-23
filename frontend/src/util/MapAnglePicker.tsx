@@ -41,7 +41,7 @@ const MapAnglePicker = (
     return (
         <>
             <MapContainer ref={mapRef} center={position} zoom={14} scrollWheelZoom={true}
-                          style={{ height: "300px", width: "25vw" }}
+                          className={"h-80 w-80 md:w-120 md:h-90 lg:w-140 lg:h-100"}
                           attributionControl={false}
             >
                 <TileLayer

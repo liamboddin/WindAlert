@@ -36,6 +36,5 @@ npm run dev
 ## TODO's
 
 - User Management backend concept
-- Prettier E-Mails
 - Logo
 - AI

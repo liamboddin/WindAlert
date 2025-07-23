@@ -6,9 +6,10 @@ import {
     Box,
     Button,
     CircularProgress,
-    Grid2,
+    Grid,
     IconButton,
     Stack,
+    Typography,
 } from "@mui/material";
 import { deleteSpot, deleteWindWindow, getSpotInfo, sendMail } from "../api/callApi";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -29,6 +30,16 @@ const useSpotInfoQuery = () => {
     });
 };
 
+const deleteButtonStyle = {
+    color: "#A11",
+    padding: 0,
+    "&:hover": {
+        backgroundColor: "#BBB",
+        color: "#A11",
+    },
+} as const;
+
+
 export const Home = () => {
     const { data: spots, refetch, isFetching } = useSpotInfoQuery();
     const [openEditSpotModal, setOpenEditSpotModal] = useState<boolean>(false);
@@ -40,16 +51,16 @@ export const Home = () => {
 
     return isFetching ?
         <>
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <CircularProgress style={{ alignSelf: "center" }} />
+            <Box className={"flex justify-center"}>
+                <CircularProgress className={"self-center"} />
             </Box>
         </>
         : spots == undefined ? (
             <>
-                <Box sx={{ width: "20%", display: "center", justifyContent: "left", paddingTop: "20%" }}>
+                <Box className={"flex justify-center pt-[20%]"}>
                     <Stack spacing={2} direction={"column"}
-                           sx={{ width: "20%", display: "center", justifyContent: "center", paddingTop: "20%" }}>
-                        <Button sx={{ display: "center", justifyContent: "center" }} onClick={() => refetch()}>
+                           className={"w-1/5 flex justify-center pt-1/5"}>
+                        <Button className={"flex justify-center"} onClick={() => refetch()}>
                             Neu laden
                         </Button>
                         <Button
@@ -57,8 +68,7 @@ export const Home = () => {
                             onClick={() => {
                                 setIsCreateSpot(true);
                                 setOpenEditSpotModal(true);
-                            }
-                            }
+                            }}
                         >
                             Spot erstellen
                         </Button>
@@ -67,46 +77,35 @@ export const Home = () => {
             </>
         ) : (
             <>
-                <Box sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                }}>
+                <Box className={"w-full"}>
                     <Stack spacing={2} direction={"column"}
-                           sx={{
-                               display: "flex",
-                               justifyContent: "center",
-                               width: "30%",
-                           }}>
-                        <Box sx={{ display: "flex", justifyContent: "center", width: "auto" }}>
+                           className={"w-full px-4 mx-auto md:w-4/5 lg:w-2/5"}
+                    >
+                        <Box className={"flex justify-center w-auto"}>
                             <Button
                                 onClick={() => sendMail()}>
                                 Manuell Wind checken
                             </Button>
                         </Box>
                         {spots.map(dto => {
-                            return <>
-                                <Grid2 container spacing={1}
-                                       sx={{
-                                           fontFamily: "Arial",
-                                           borderStyle: "solid",
-                                           borderWidth: "2px",
-                                           borderColor: "#DDDDFF",
-                                           padding: "10px",
-                                       }}>
-                                    <Grid2 size={9} sx={{ fontSize: "20px", fontWeight: "bold" }}>
-                                        {dto.spotName}
-                                    </Grid2>
-                                    <Grid2 size={1.5}>
+                            return (
+                                <Grid key={dto.spotId} container spacing={1}
+                                      className={"font-[Arial] border-solid border-2 border-[#DDDDFF] p-[10px]"}>
+                                    <Grid size={9}>
+                                        <Typography variant={"h4"}>
+                                            {dto.spotName}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid size={1.5}>
                                         <IconButton
-                                            sx={{ color: "#FF4444", padding: "0" }}
+                                            sx={deleteButtonStyle}
                                             onClick={() => {
                                                 deleteSpot(dto.spotId).then(() => refetch());
                                             }}>
                                             <DeleteIcon />
                                         </IconButton>
-                                    </Grid2>
-                                    <Grid2 size={1.5}>
+                                    </Grid>
+                                    <Grid size={1.5}>
                                         <IconButton
                                             color={"primary"}
                                             sx={{ padding: 0 }}
@@ -117,46 +116,46 @@ export const Home = () => {
                                             }}>
                                             <EditIcon />
                                         </IconButton>
-                                    </Grid2>
-                                    <Grid2 size={12}>
-                                        Breitengrad: {dto.spotLatitude}
-                                    </Grid2>
-                                    <Grid2 size={12}>
-                                        Längengrad: {dto.spotLongitude}
-                                    </Grid2>
-                                    <Grid2>
+                                    </Grid>
+                                    <Grid size={12}>
+                                        <Typography variant={"subtitle1"}>
+                                            Breitengrad: {dto.spotLatitude}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid size={12}>
+                                        <Typography variant={"subtitle1"}>
+                                            Längengrad: {dto.spotLongitude}
+                                        </Typography>
+                                    </Grid>
+                                    <Grid size={12}>
                                         {dto.windows.length != 0 ?
-                                            <Accordion sx={{ fontFamily: "Arial" }}>
-                                                <AccordionSummary
-                                                    expandIcon={<ExpandMore />}
-                                                    sx={{ fontSize: "19px" }}
-                                                >Windfenster</AccordionSummary>
+                                            <Accordion className={"font-[Arial]"}>
+                                                <AccordionSummary expandIcon={<ExpandMore />}>
+                                                    <Typography variant={"h6"}>
+                                                        Windfenster
+                                                    </Typography>
+                                                </AccordionSummary>
                                                 <AccordionDetails>
                                                     <Stack>
                                                         {dto.windows.map(window =>
-                                                            <>
-                                                                <Grid2 container spacing={1}
-                                                                       sx={{
-                                                                           paddingTop: "20px",
-                                                                           borderStyle: "solid none none none",
-                                                                           borderWidth: "2px",
-                                                                           borderColor: "#DDDDFF",
-                                                                           paddingBottom: "20px",
-                                                                       }}>
-                                                                    <Grid2 size={9}>
-                                                                        Windgeschwindigkeit: {window.speed} Knoten
-                                                                    </Grid2>
-                                                                    <Grid2 size={1.5}>
+                                                            (
+                                                                <Grid key={window.windWindowId} container spacing={1}
+                                                                      className={"py-[20px] border-t-2 border-[#DDDDFF]"}>
+                                                                    <Grid size={9}>
+                                                                        <Typography variant={"subtitle1"}>
+                                                                            Windgeschwindigkeit: {window.speed} Knoten
+                                                                        </Typography>
+                                                                    </Grid>
+                                                                    <Grid size={1.5}>
                                                                         <IconButton
-                                                                            sx={{ color: "#FF4444", padding: "0" }}
+                                                                            sx={deleteButtonStyle}
                                                                             onClick={() => {
                                                                                 deleteWindWindow(window.windWindowId).then(() => refetch());
-                                                                            }
-                                                                            }>
+                                                                            }}>
                                                                             <DeleteIcon />
                                                                         </IconButton>
-                                                                    </Grid2>
-                                                                    <Grid2 size={1.5}>
+                                                                    </Grid>
+                                                                    <Grid size={1.5}>
                                                                         <IconButton
                                                                             color={"primary"}
                                                                             sx={{ padding: 0 }}
@@ -166,17 +165,21 @@ export const Home = () => {
                                                                                 setSelectedWindow(window);
                                                                                 setOpenEditWindowModal(true);
                                                                             }}><EditIcon /></IconButton>
-                                                                    </Grid2>
-                                                                    <Grid2 size={12}>
-                                                                        Startwinkel: {window.startAngle}
-                                                                    </Grid2>
-                                                                    <Grid2 size={12}>
-                                                                        Endwinkel: {window.endAngle}
-                                                                    </Grid2>
-                                                                </Grid2>
-                                                            </>)}
+                                                                    </Grid>
+                                                                    <Grid size={12}>
+                                                                        <Typography variant={"subtitle1"}>
+                                                                            Startwinkel: {window.startAngle}
+                                                                        </Typography>
+                                                                    </Grid>
+                                                                    <Grid size={12}>
+                                                                        <Typography variant={"subtitle1"}>
+                                                                            Endwinkel: {window.endAngle}
+                                                                        </Typography>
+                                                                    </Grid>
+                                                                </Grid>
+                                                            ))}
                                                         <Button
-                                                            sx={{ marginTop: "10px" }}
+                                                            className={"mt-[10px]"}
                                                             variant="outlined"
                                                             startIcon={<Add />}
                                                             onClick={() => {
@@ -197,37 +200,28 @@ export const Home = () => {
                                                     setOpenEditWindowModal(true);
                                                 }}
                                             >Windfenster hinzufügen</Button>}
-                                    </Grid2>
-                                </Grid2>
-                            </>;
+                                    </Grid>
+                                </Grid>);
                         })}
-                        <Box sx={{ display: "flex", justifyContent: "center", width: "auto" }}>
+                        <Box className={"flex justify-center w-auto"}>
                             <Button
-
                                 variant={"contained"}
                                 onClick={() => {
                                     setIsCreateSpot(true);
                                     setOpenEditSpotModal(true);
-                                }
-                                }
-                            >
+                                }}>
                                 Spot erstellen
                             </Button>
                         </Box>
                     </Stack>
-                </Box>
-
-                <EditSpotModal open={openEditSpotModal} setOpen={setOpenEditSpotModal} dto={selectedSpot}
-                               isCreateSpot={isCreateSpot} refetch={refetch} />
-                {
-                    selectedSpot &&
-                    (<>
+                    <EditSpotModal open={openEditSpotModal} setOpen={setOpenEditSpotModal} dto={selectedSpot}
+                                   isCreateSpot={isCreateSpot} refetch={refetch} />
+                    {selectedSpot && (
                         <EditWindowModal open={openEditWindowModal} setOpen={setOpenEditWindowModal}
                                          spot={selectedSpot} dto={selectedWindow} refetch={refetch}
                                          isCreateWindow={isCreateWindow} />
-                    </>)
-                }
-
+                    )}
+                </Box>
             </>);
 };
 

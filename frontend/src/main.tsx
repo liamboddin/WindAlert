@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 
 const queryClient = new QueryClient({
     mutationCache: new MutationCache({
@@ -17,7 +17,7 @@ const queryClient = new QueryClient({
     }),
 });
 
-const persister = createSyncStoragePersister({
+const persister = createAsyncStoragePersister({
     storage: window.localStorage,
 });
 
