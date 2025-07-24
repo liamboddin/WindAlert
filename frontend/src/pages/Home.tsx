@@ -79,7 +79,7 @@ export const Home = () => {
             <>
                 <Box className={"w-full"}>
                     <Stack spacing={2} direction={"column"}
-                           className={"w-full px-4 mx-auto md:w-4/5 lg:w-2/5"}
+                           className={"w-full px-4 py-5 mx-auto md:w-4/5 lg:w-2/5"}
                     >
                         <Box className={"flex justify-center w-auto"}>
                             <Button

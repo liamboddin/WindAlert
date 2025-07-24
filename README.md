@@ -38,3 +38,6 @@ npm run dev
 - User Management backend concept
 - Logo
 - AI
+
+## Deploy new changes
+docker compose down && docker compose up --build -d
