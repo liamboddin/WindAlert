@@ -1,8 +1,10 @@
 package de.windalert.service;
 
 import de.windalert.domain.Spot;
+import de.windalert.domain.User;
 import de.windalert.domain.WindWindow;
 import de.windalert.repository.SpotRepository;
+import de.windalert.repository.UserRepository;
 import de.windalert.service.dto.ApiResponse;
 import de.windalert.util.MailService;
 import de.windalert.util.SpotStringified;
@@ -23,16 +25,30 @@ public class AskAPI {
     private final SpotRepository spotRepository;
     private final RestService restService;
     private final MailService mailService;
+    private final UserRepository userRepository;
 
-    public AskAPI(MailService mailService, SpotRepository spotRepository, RestService restService) {
+    public AskAPI(MailService mailService, SpotRepository spotRepository, RestService restService, UserRepository userRepository) {
         this.mailService = mailService;
         this.spotRepository = spotRepository;
         this.restService = restService;
+        this.userRepository = userRepository;
+    }
+
+    public void requestAPIAndSendMail(User user) {
+        List<Spot> spots = spotRepository.findAllByUser(user);
+        requestAPIAndSendMail(spots, user.getUsername());
     }
 
     @Scheduled(cron = "0 0 7 * * *", zone = "Europe/Berlin")
-    public void requestAPIAndSendMail() {
-        List<Spot> spots = spotRepository.findAll();
+    private void requestAPIAndSendMailToAllUsers() {
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            requestAPIAndSendMail(user);
+        }
+        log.info("Finished looking for wind!");
+    }
+
+    private void requestAPIAndSendMail(List<Spot> spots, String email) {
         log.info("Starting to look for some wind!");
         boolean isWindFound = false;
         List<SpotStringified> spotStringifiedList = new ArrayList<>();
@@ -117,10 +133,10 @@ public class AskAPI {
             }
         }
         if (isWindFound) {
-            log.info("Sending mail!");
-            mailService.sendMail("liam.d.boddin@gmail.com", "WindAlert", spotStringifiedList);
+            log.info("Sending mail to {}!", email);
+            mailService.sendMail(email, "WindAlert", spotStringifiedList);
+            log.info("Mail sent to {}!", email);
         }
-        log.info("Finished looking for wind!");
     }
 
     public boolean isMorning(LocalDateTime date) {

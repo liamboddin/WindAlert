@@ -13,3 +13,7 @@ export interface WindWindow {
     endAngle: number;
 }
 
+export interface TokenDTO {
+    token: string;
+}
+

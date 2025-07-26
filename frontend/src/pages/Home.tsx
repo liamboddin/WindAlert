@@ -20,6 +20,7 @@ import { EditSpotModal } from "../forms/EditSpotModal.tsx";
 import { EditWindowModal } from "../forms/EditWindowModal.tsx";
 import { useQuery } from "@tanstack/react-query";
 import queryKeys from "../api/queryKeys.ts";
+import { useNavigate } from "react-router-dom";
 
 const useSpotInfoQuery = () => {
     return useQuery<InfoDTO[]>({
@@ -48,46 +49,43 @@ export const Home = () => {
     const [selectedWindow, setSelectedWindow] = useState<WindWindow>();
     const [isCreateSpot, setIsCreateSpot] = useState(true);
     const [isCreateWindow, setIsCreateWindow] = useState(true);
+    const navigate = useNavigate();
 
     return isFetching ?
         <>
-            <Box className={"flex justify-center"}>
+            <Box className={"w-full px-4 py-5 mx-auto md:w-4/5 lg:w-2/5"}>
                 <CircularProgress className={"self-center"} />
             </Box>
         </>
-        : spots == undefined ? (
-            <>
-                <Box className={"flex justify-center pt-[20%]"}>
-                    <Stack spacing={2} direction={"column"}
-                           className={"w-1/5 flex justify-center pt-1/5"}>
-                        <Button className={"flex justify-center"} onClick={() => refetch()}>
-                            Neu laden
-                        </Button>
-                        <Button
-                            variant={"contained"}
-                            onClick={() => {
-                                setIsCreateSpot(true);
-                                setOpenEditSpotModal(true);
-                            }}
-                        >
-                            Spot erstellen
-                        </Button>
-                    </Stack>
-                </Box>
-            </>
-        ) : (
+        : (
             <>
                 <Box className={"w-full"}>
                     <Stack spacing={2} direction={"column"}
                            className={"w-full px-4 py-5 mx-auto md:w-4/5 lg:w-2/5"}
                     >
-                        <Box className={"flex justify-center w-auto"}>
+                        <Box className={"flex w-auto justify-evenly"}>
                             <Button
+                                variant={"contained"}
                                 onClick={() => sendMail()}>
                                 Manuell Wind checken
                             </Button>
+                            <Button variant={"contained"}
+                                    onClick={() => {
+                                        localStorage.removeItem("token");
+                                        navigate("/login");
+                                    }}>
+                                Abmelden
+                            </Button>
                         </Box>
-                        {spots.map(dto => {
+                        {spots == undefined || spots?.length == 0 && (
+                            <Box
+                                className={"flex justify-center font-[Arial] border-solid border-2 border-[#DDDDFF] p-[10px]"}>
+                                <Typography>
+                                    Keine Spots gespeichert
+                                </Typography>
+                            </Box>
+                        )}
+                        {spots?.map(dto => {
                             return (
                                 <Grid key={dto.spotId} container spacing={1}
                                       className={"font-[Arial] border-solid border-2 border-[#DDDDFF] p-[10px]"}>
@@ -191,15 +189,19 @@ export const Home = () => {
                                                     </Stack>
                                                 </AccordionDetails>
                                             </Accordion> :
-                                            <Button
-                                                variant="outlined"
-                                                startIcon={<Add />}
-                                                onClick={() => {
-                                                    setIsCreateWindow(true);
-                                                    setSelectedSpot(dto);
-                                                    setOpenEditWindowModal(true);
-                                                }}
-                                            >Windfenster hinzufügen</Button>}
+                                            <Box className={"flex justify-center w-full"}>
+                                                <Button
+                                                    className={"w-full"}
+                                                    variant="outlined"
+                                                    startIcon={<Add />}
+                                                    onClick={() => {
+                                                        setIsCreateWindow(true);
+                                                        setSelectedSpot(dto);
+                                                        setOpenEditWindowModal(true);
+                                                    }}
+                                                >Windfenster hinzufügen</Button>
+                                            </Box>
+                                        }
                                     </Grid>
                                 </Grid>);
                         })}

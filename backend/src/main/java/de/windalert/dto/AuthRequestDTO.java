@@ -2,9 +2,8 @@ package de.windalert.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record Login(
+public record AuthRequestDTO(
         @NotBlank String username,
         @NotBlank String password
 ) {
-
 }

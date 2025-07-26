@@ -28,3 +28,7 @@ spring:
 server:
   port:
     8080
+security:
+  jwt:
+    secret: "eine_lange_geheime_phrase_mit_ausreichender_laenge_!!! und unglaublicher Sicherheit"
+    expiration-ms: 86400000

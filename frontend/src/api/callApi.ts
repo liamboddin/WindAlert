@@ -2,7 +2,7 @@ import { CreateSpotDTO } from "../dto/CreateSpotDTO";
 import { SpotDTO } from "../dto/SpotDTO";
 import { WindWindowDTO } from "../dto/WindWIndowDTO";
 import { deleteRequest, get, post, put } from "./restApi";
-import { InfoDTO } from "../dto/InfoDTO.ts";
+import { InfoDTO, TokenDTO } from "../dto/InfoDTO.ts";
 
 export const getSpotInfo = async (): Promise<InfoDTO[]> => {
     return await get("/api/v1/spot");
@@ -32,14 +32,22 @@ export const deleteWindWindow = async (id: number): Promise<void> => {
     return await deleteRequest("/api/v1/window/" + id);
 };
 
-export const setPasswordRequest = async (uuid: string, password: string): Promise<void> => {
-    return await post("/api/v1/reset-password", { uuid: uuid, password: password });
+export const register = async (username: string) => {
+    return await post("/api/v1/register", { username: username, baseUrl: window.location.origin });
 };
 
-export const login = async (username: string, password: string): Promise<void> => {
+export const resetPassword = async (username: string) => {
+    return await post("/api/v1/password-reset", { username: username, baseUrl: window.location.origin });
+};
+
+export const login = async (username: string, password: string): Promise<TokenDTO> => {
     return await post("/api/v1/login", { username: username, password: password });
 };
 
 export const sendMail = async (): Promise<void> => {
     return await post("/api/v1/check-wind", {});
+};
+
+export const activateAccount = async (token: string, password: string): Promise<void> => {
+    return await post("/api/v1/activate", { token: token, password: password });
 };
