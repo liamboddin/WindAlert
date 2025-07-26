@@ -30,7 +30,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-
+        
+        if (!path.startsWith("/api/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         // Login/Registration/Activate sollen nicht mit JWT geprüft werden
         if (path.startsWith("/api/v1/login") ||
                 path.startsWith("/api/v1/register") ||
