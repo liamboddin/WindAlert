@@ -32,6 +32,50 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
         setEndAngle(!isCreateWindow ? propDTO?.endAngle : Number.NaN);
     }, [isCreateWindow, propDTO]);
 
+    const onConfirm = () => {
+        if (!speed || !startAngle || !endAngle || !spot.spotId) {
+            toast.warning("Es sind noch nicht alle Werte gesetzt!");
+            if (!speed) {
+                setSpeedError(true);
+            }
+            if (!startAngle) {
+                setStartAngleError(true);
+            }
+            if (!endAngle) {
+                setEndAngleError(true);
+            }
+            return;
+        }
+        setSpeedError(false);
+        setStartAngleError(false);
+        setEndAngleError(false);
+
+        if (isCreateWindow) {
+            createWindWindow({
+                speed: speed,
+                startAngle: startAngle,
+                endAngle: endAngle,
+                spotId: spot.spotId,
+            })
+                .then(() => refetch())
+                .then(() => setOpen(false));
+        } else {
+            if (!propDTO?.windWindowId || !spot.spotId) {
+                toast.error("Etwas ist schief gelaufen!");
+                return;
+            }
+            updateWindWindow({
+                id: propDTO.windWindowId,
+                speed: speed,
+                startAngle: startAngle,
+                endAngle: endAngle,
+                spotId: spot.spotId,
+            })
+                .then(() => refetch())
+                .then(() => setOpen(false));
+        }
+    };
+
     if (!isCreateWindow && propDTO == undefined) {
         return <></>;
     }
@@ -40,6 +84,11 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
         <Modal
             open={open}
             onClose={() => setOpen(false)}
+            onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                    onConfirm();
+                }
+            }}
             style={{
                 display: "flex",
                 justifyContent: "center",
@@ -130,49 +179,8 @@ export const EditWindowModal = (props: EditWindowModalProps) => {
                     <Button
                         variant={"contained"}
                         className="button button-primary"
-                        onClick={() => {
-                            if (!speed || !startAngle || !endAngle || !spot.spotId) {
-                                toast.warning("Es sind noch nicht alle Werte gesetzt!");
-                                if (!speed) {
-                                    setSpeedError(true);
-                                }
-                                if (!startAngle) {
-                                    setStartAngleError(true);
-                                }
-                                if (!endAngle) {
-                                    setEndAngleError(true);
-                                }
-                                return;
-                            }
-                            setSpeedError(false);
-                            setStartAngleError(false);
-                            setEndAngleError(false);
-
-                            if (isCreateWindow) {
-                                createWindWindow({
-                                    speed: speed,
-                                    startAngle: startAngle,
-                                    endAngle: endAngle,
-                                    spotId: spot.spotId,
-                                })
-                                    .then(() => refetch())
-                                    .then(() => setOpen(false));
-                            } else {
-                                if (!propDTO?.windWindowId || !spot.spotId) {
-                                    toast.error("Etwas ist schief gelaufen!");
-                                    return;
-                                }
-                                updateWindWindow({
-                                    id: propDTO.windWindowId,
-                                    speed: speed,
-                                    startAngle: startAngle,
-                                    endAngle: endAngle,
-                                    spotId: spot.spotId,
-                                })
-                                    .then(() => refetch())
-                                    .then(() => setOpen(false));
-                            }
-                        }}>
+                        onClick={() => onConfirm()}
+                    >
                         Bestätigen
                     </Button>
                 </Box>

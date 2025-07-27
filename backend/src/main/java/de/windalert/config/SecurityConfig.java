@@ -36,6 +36,8 @@ public class SecurityConfig {
                                 "/api/v1/login",
                                 "/api/v1/register",
                                 "/api/v1/activate",
+                                "/reactivate*",
+                                "/activate*",
                                 "/api/v1/password-reset",
                                 "/",                      // Root-URL
                                 "/index.html",            // Haupt-UI
