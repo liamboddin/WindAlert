@@ -11,6 +11,7 @@ import de.windalert.util.SpotStringified;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,8 +40,9 @@ public class AskAPI {
         requestAPIAndSendMail(spots, user.getUsername());
     }
 
+    @Transactional(readOnly = true)
     @Scheduled(cron = "0 0 7 * * *", zone = "Europe/Berlin")
-    private void requestAPIAndSendMailToAllUsers() {
+    public void requestAPIAndSendMailToAllUsers() {
         List<User> users = userRepository.findAll();
         for (User user : users) {
             requestAPIAndSendMail(user);
@@ -48,7 +50,7 @@ public class AskAPI {
         log.info("Finished looking for wind!");
     }
 
-    private void requestAPIAndSendMail(List<Spot> spots, String email) {
+    public void requestAPIAndSendMail(List<Spot> spots, String email) {
         log.info("Starting to look for some wind!");
         boolean isWindFound = false;
         List<SpotStringified> spotStringifiedList = new ArrayList<>();
