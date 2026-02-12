@@ -25,7 +25,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Testcontainers(disabledWithoutDocker = true)
 @TestPropertySource(properties = {
         "app.ui=../frontend",
-        "BASE_URL=http://test"
+        "BASE_URL=http://test",
+        "MAIL_SMTP=smtp.test.de",
+        "JWT_SECRET=testttttttttttttttttttttneedsmoresecrecygogogogo",
+        "MAIL_USER=test",
+        "MAIL_PASSWORD=test",
+        "MAIL_PORT=123"
 })
 @ActiveProfiles("test")
 public class AskApiTest {

@@ -3,8 +3,8 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
       - POSTGRES_DB=alert
     ports:
       - "15432:5432"
@@ -20,7 +20,12 @@ services:
     environment:
       - PG_PORT=5432
       - PG_HOST=db
-      - PG_USER=admin
-      - PG_PASSWORD=password
+      - PG_USER=${PG_USER}
+      - PG_PASSWORD=${PG_PASSWORD}
+      - MAIL_SMTP=${MAIL_SMTP}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
 volumes:
   pg:

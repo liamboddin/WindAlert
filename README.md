@@ -35,7 +35,6 @@ npm run dev
 
 ## TODO's
 
-- User Management backend concept
 - Logo
 - AI
 

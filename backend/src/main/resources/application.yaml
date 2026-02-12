@@ -8,13 +8,13 @@ spring:
   store-type: jdbc
   mail:
     host:
-      smtp.gmail.com
+      ${MAIL_SMTP}
     port:
-      587
+      ${MAIL_PORT}
     username:
-      xxxxxxx
+      ${MAIL_USERNAME}
     password:
-      xxxxxxxxxxxxxxxx
+      ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -30,5 +30,5 @@ server:
     8080
 security:
   jwt:
-    secret: "eine_lange_geheime_phrase_mit_ausreichender_laenge_!!! und unglaublicher Sicherheit"
+    secret: ${JWT_SECRET}
     expiration-ms: 86400000
