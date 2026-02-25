@@ -2,6 +2,20 @@
 
 ## Starting it locally
 
+### Docker Compose
+
+Create a `.env`-file that sets the necessary environment variables.
+
+```
+PG_USER=yourusername
+PG_PASSWORD=yourpassword
+MAIL_SMTP=SmtpServerUrlOfYourMailServer
+MAIL_PORT=123
+MAIL_USERNAME=YourMailUsername
+MAIL_PASSWORD=YourMailPassword
+JWT_SECRET=LongSequenceToFulfillSecurityRequirementsTheMoreTheBetter
+```
+
 ### Backend
 
 #### Environment variables
@@ -36,7 +50,6 @@ npm run dev
 ## TODO's
 
 - Logo
-- AI
 
 ## Deploy new changes
 docker compose down && docker compose up --build -d
