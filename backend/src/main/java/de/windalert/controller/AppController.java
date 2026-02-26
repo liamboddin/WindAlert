@@ -30,7 +30,7 @@ public class AppController {
 
     @RequestMapping("/")
     @ResponseBody
-    public String getMainUIPath(    ) throws IOException {
+    public String getMainUIPath() throws IOException {
         final Path indexHtml = ui.resolve("index.html");
         String html = Files.readString(indexHtml, StandardCharsets.UTF_8);
         LOG.debug("html resolves to {}.", html);

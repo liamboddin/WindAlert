@@ -57,7 +57,6 @@ public class MailService {
         final MimeMessage mimeMessage = mailSender.createMimeMessage();
         final MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MULTIPART_MODE_RELATED, UTF_8.name());
 
-
         helper.setFrom(from, personal);
         helper.setTo(to);
         helper.setSubject(subject);

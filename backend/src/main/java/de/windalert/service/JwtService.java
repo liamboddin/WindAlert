@@ -22,9 +22,6 @@ public class JwtService {
             @Value("${security.jwt.secret}") String secret,
             @Value("${security.jwt.expiration-ms:86400000}") long jwtExpirationMs
     ) {
-        // Empfehlung: Secret als Base64 encoden und hier wieder decodieren.
-        // Wenn dein Secret plain-text ist, kannst du auch:
-        // this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.jwtExpirationMs = jwtExpirationMs;
     }
@@ -37,13 +34,12 @@ public class JwtService {
                 .subject(subject)
                 .issuedAt(now)
                 .expiration(expiry)
-                .signWith(key) // oder HS256
+                .signWith(key)
                 .compact();
     }
 
     public boolean isTokenValid(String token) {
         try {
-            // Löst eine Exception aus, wenn ungültig/abgelaufen usw.
             Jwts.parser()
                     .verifyWith(key)
                     .build()
@@ -64,7 +60,7 @@ public class JwtService {
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload(); // in 0.12.x heißt es Payload, nicht Body
+                .getPayload();
         return claimsResolver.apply(claims);
     }
 }

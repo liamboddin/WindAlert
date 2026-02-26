@@ -55,7 +55,7 @@ public class WebController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequestDTO loginRequest) {
         try {
-            // Authentifizieren
+            // Authentication
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.username(),
@@ -63,7 +63,6 @@ public class WebController {
                     )
             );
 
-            // Token erzeugen
             log.info("User {} logged in", loginRequest.username());
             String token = jwtService.generateToken(loginRequest.username());
             return ResponseEntity.ok(Map.of("token", token));
@@ -135,7 +134,7 @@ public class WebController {
         User user = userOpt.get();
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setEnabled(true);
-        user.setActivationToken(null); // Token löschen
+        user.setActivationToken(null);
 
         userRepository.save(user);
         log.info("User {} activated", user.getUsername());

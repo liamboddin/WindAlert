@@ -29,7 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults()) // CORS aktivieren
+                .cors(Customizer.withDefaults()) // Activate CORS
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
@@ -39,9 +39,9 @@ public class SecurityConfig {
                                 "/reactivate*",
                                 "/activate*",
                                 "/api/v1/password-reset",
-                                "/",                      // Root-URL
-                                "/index.html",            // Haupt-UI
-                                "/static/**",             // JS/CSS
+                                "/",
+                                "/index.html",
+                                "/static/**",
                                 "/*.js",
                                 "/*.css",
                                 "/*.ico",
@@ -55,7 +55,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    // Standard AuthenticationManager für Username/Password
+    // Standard AuthenticationManager for Username/Password
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -66,7 +66,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // CORS Konfiguration
+    // CORS Config
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
