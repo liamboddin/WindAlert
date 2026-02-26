@@ -1,5 +1,9 @@
 # WindAlert
 
+An E-Mail-Alert-System for your personal favorite Kitesurfing-Spots. 
+
+Create a user account with your personal e-mail you want to get the alerts sent to. Then add your kitesurfing spots via mouse-click on the map. Create wind windows with the windconditions for each spot you want to be alerted for. All that is left to do now is wait for some good conditions and get alerted in the morning as soon as some good conditions are forecasted. 
+
 ## Starting it locally
 
 ### Docker Compose
