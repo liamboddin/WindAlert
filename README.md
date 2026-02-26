@@ -12,8 +12,7 @@ Create wind windows with the windconditions for each spot you want to be alerted
 
 ![wind_window.png](wind_window.png)
 All that is left to do now is wait for some good conditions and get alerted in the morning as soon as some good
-conditions are
-forecasted.
+conditions are forecasted. It operates in the UTC+1 (central european time) timezone.
 
 ## Starting it locally
 

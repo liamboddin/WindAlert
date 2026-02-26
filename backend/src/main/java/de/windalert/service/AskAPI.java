@@ -138,6 +138,8 @@ public class AskAPI {
             log.info("Sending mail to {}!", email);
             mailService.sendMail(email, "WindAlert", spotStringifiedList);
             log.info("Mail sent to {}!", email);
+        } else {
+            log.info("No wind was found today!");
         }
     }
 
