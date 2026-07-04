@@ -21,20 +21,22 @@ conditions are forecasted. It operates in the UTC+1 (central european time) time
 Create a `.env`-file that sets the necessary environment variables.
 
 ```
+GH_USER=yourgithubusername
 PG_USER=yourusername
-PG_PASSWORD=yourpassword
-MAIL_SMTP=smtp.example.com
-MAIL_PORT=587
-MAIL_USERNAME=YourMailUsername (App-Password name if you use gmail)
-MAIL_PASSWORD=YourMailPassword (App-Password if you use gmail)
-JWT_SECRET=LongSequenceToFulfillSecurityRequirementsTheMoreTheBetterChangeThis
+...
 ```
 
-You can start the postgres database with the following command:
+The images are automatically built and pushed to GHCR via GitHub Actions.
+You can pull and start the system with:
 
 ```
-docker compose up -d db
+docker compose pull
+docker compose up -d
 ```
+
+For local development building:
+1. Uncomment `# build: .` in `docker-compose.yml`
+2. Run `docker compose up --build`
 
 ### Backend
 
@@ -75,6 +77,8 @@ npm run dev
 ## TODO's
 
 - Logo
+- Toasts which show that data was changed etc. via request
+- Arriving at home page first time shouldn't throw error -> distinguish outdated jwt and no jwt or something
 
 ## Deploy new changes
 

@@ -13,7 +13,8 @@ services:
 
 
   server:
-    build: .
+    image: ghcr.io/${GH_USER:-liamboddin}/windalert:latest
+    # build: .
     restart: unless-stopped
     ports:
       - "8080:8080"

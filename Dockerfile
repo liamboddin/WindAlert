@@ -1,25 +1,36 @@
-FROM eclipse-temurin:21-jre AS builder
+# Stage 1: Build Frontend
+FROM node:lts-alpine AS frontend-build
+WORKDIR /app/frontend
+COPY frontend/package*.json ./
+RUN npm install
+COPY frontend/ ./
+RUN npm run build
 
-ARG JAR_FILE=backend/build/libs/*-SNAPSHOT.jar
-COPY ${JAR_FILE} application.jar
-RUN java -Djarmode=layertools -jar application.jar extract
+# Stage 2: Build Backend
+FROM eclipse-temurin:21-jdk-alpine AS backend-build
+WORKDIR /app/backend
+COPY backend/gradlew .
+COPY backend/gradle gradle
+COPY backend/build.gradle .
+COPY backend/settings.gradle .
+RUN chmod +x gradlew
+RUN ./gradlew dependencies --no-daemon
+COPY backend/src src
+RUN ./gradlew bootJar --no-daemon
 
-FROM eclipse-temurin:21-jre
+# Stage 3: Final Image
+FROM eclipse-temurin:21-jre-alpine
 
-RUN groupadd windalert && useradd --no-log-init --system -g windalert windalert
+RUN addgroup -S windalert && adduser -S windalert -G windalert
 USER windalert
 
-ENV JVM_OPTS="-Xms1024m -Xmx1024m"
-
-VOLUME /tmp
-
+ENV JVM_OPTS="-Xms512m -Xmx512m"
 WORKDIR /app
 
-COPY --from=builder dependencies/ ./
+# Copy Backend JAR
+COPY --from=backend-build /app/backend/build/libs/*.jar application.jar
 
-COPY --from=builder spring-boot-loader/ ./
-COPY --from=builder application/ ./
+# Copy Frontend dist
+COPY --from=frontend-build /app/frontend/dist ./ui
 
-COPY frontend/dist ./ui
-
-ENTRYPOINT java -server $JVM_OPTS org.springframework.boot.loader.launch.JarLauncher --app.ui=./ui
+ENTRYPOINT java -server $JVM_OPTS -jar application.jar --app.ui=./ui
