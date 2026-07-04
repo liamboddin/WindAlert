@@ -7,16 +7,18 @@ COPY frontend/ ./
 RUN npm run build
 
 # Stage 2: Build Backend
-FROM eclipse-temurin:21-jdk-alpine AS backend-build
+FROM gradle:8-jdk21-alpine AS backend-build
 WORKDIR /app/backend
-COPY backend/gradlew .
-COPY backend/gradle gradle
+
+# Copy gradle config first to cache dependencies
 COPY backend/build.gradle .
 COPY backend/settings.gradle .
-RUN chmod +x gradlew
-RUN ./gradlew dependencies --no-daemon
+
+# Using pre-installed gradle in the image instead of wrapper to avoid download issues in QEMU
+RUN gradle dependencies --no-daemon
+
 COPY backend/src src
-RUN ./gradlew bootJar --no-daemon
+RUN gradle bootJar --no-daemon
 
 # Stage 3: Final Image
 FROM eclipse-temurin:21-jre-alpine
